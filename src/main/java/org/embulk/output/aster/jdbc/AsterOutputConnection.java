@@ -24,18 +24,20 @@ public class AsterOutputConnection
     protected final Connection connection;
     protected final DatabaseMetaData databaseMetaData;
     protected String identifierQuoteString;
+    protected Optional<String> schema;
     protected Optional<String> distributeKey;
 
-    public AsterOutputConnection(Connection connection, Optional<String> distributeKey)
+    public AsterOutputConnection(Connection connection, Optional<String> schema, Optional<String> distributeKey)
             throws SQLException
     {
         super(connection, null);
         this.connection = connection;
         this.databaseMetaData = connection.getMetaData();
+        this.schema = schema;
         this.distributeKey = distributeKey;
         this.identifierQuoteString = databaseMetaData.getIdentifierQuoteString();
-        if (schemaName != null) {
-            setSearchPath(schemaName);
+        if (schema.isPresent()) {
+            setSearchPath(schema.get());
         }
     }
 
@@ -43,6 +45,8 @@ public class AsterOutputConnection
     public void close() throws SQLException
     {
         if (!connection.isClosed()) {
+            executeQuery("END;");
+
             connection.close();
         }
     }
@@ -64,14 +68,8 @@ public class AsterOutputConnection
 
     protected void setSearchPath(String schema) throws SQLException
     {
-        Statement stmt = connection.createStatement();
-        try {
-            String sql = "DATABASE " + quoteIdentifierString(schema);
-            executeUpdate(stmt, sql);
-            commitIfNecessary(connection);
-        } finally {
-            stmt.close();
-        }
+        String sql = "SET search_path TO " + quoteIdentifierString(schema);
+        executeQuery(sql);
     }
 
     @Override
@@ -265,6 +263,17 @@ public class AsterOutputConnection
             e = e.getCause();
         }
         return e;
+    }
+
+    protected void executeQuery(String sql) throws SQLException
+    {
+        Statement stmt = connection.createStatement();
+        try {
+            executeUpdate(stmt, sql);
+            commitIfNecessary(connection);
+        } finally {
+            stmt.close();
+        }
     }
 
     protected int executeUpdate(Statement stmt, String sql) throws SQLException

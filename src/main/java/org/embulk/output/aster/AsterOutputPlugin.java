@@ -37,6 +37,10 @@ public class AsterOutputPlugin
         @ConfigDefault("beehive")
         public String getDatabase();
 
+        @Config("schema")
+        @ConfigDefault("null")
+        public Optional<String> getSchema();
+
         @Config("table")
         @ConfigDefault("null")
         public String getTable();
@@ -80,7 +84,7 @@ public class AsterOutputPlugin
         logger.info("Connecting to {} options {}", t.getUrl(), props);
         props.setProperty("password", t.getPassword());
 
-        return new AsterOutputConnector(t.getUrl(), t.getDistributeKey(), props);
+        return new AsterOutputConnector(t.getUrl(), t.getSchema(), t.getDistributeKey(), props);
     }
 
     @Override

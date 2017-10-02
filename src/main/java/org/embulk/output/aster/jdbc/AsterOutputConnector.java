@@ -17,13 +17,15 @@ public class AsterOutputConnector
     private final Logger logger = Exec.getLogger(AsterOutputConnector.class);
     private final String url;
     private final Properties properties;
+    private final Optional<String> schema;
     private final Optional<String> distributeKey;
 
-    public AsterOutputConnector(String url, Optional<String> distributeKey, Properties properties)
+    public AsterOutputConnector(String url, Optional<String> schema, Optional<String> distributeKey, Properties properties)
     {
         this.url = url;
-        this.properties = properties;
+        this.schema = schema;
         this.distributeKey = distributeKey;
+        this.properties = properties;
     }
 
     @Override
@@ -41,11 +43,11 @@ public class AsterOutputConnector
 
         try {
             Statement stmt = con.createStatement();
-            String sql = String.format("SELECT 1;");
+            String sql = "BEGIN;";
             logger.info("SQL: " + sql);
             stmt.execute(sql);
 
-            AsterOutputConnection c = new AsterOutputConnection(con, distributeKey);
+            AsterOutputConnection c = new AsterOutputConnection(con, schema, distributeKey);
             con = null;
             return c;
         }

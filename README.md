@@ -70,10 +70,11 @@ out:
   user: beehive
   password: beehive
   database: beehive
+  schema: staging
   table: t1
   distribute_key: c1
   mode: replace
- after_load: "ANALYZE public.t1"
+ after_load: "ANALYZE staging.t1"
 ```
 
 ## Build
