@@ -21,3 +21,4 @@ out:
   table: t1
   distribute_key: myid
   mode: replace
+  after_load: "ANALYZE public.t1"

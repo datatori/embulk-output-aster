@@ -73,6 +73,7 @@ out:
   table: t1
   distribute_key: c1
   mode: replace
+ after_load: "ANALYZE public.t1"
 ```
 
 ## Build
